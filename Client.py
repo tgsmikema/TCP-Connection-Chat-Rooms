@@ -30,6 +30,7 @@ class ChatClient():
 
         # Initial prompt
         self.prompt = f'[{name}@{socket.gethostname()}]> '
+        # print(f"host name: {socket.gethostname()}")
 
         # Connect to server at port
         try:
@@ -40,7 +41,10 @@ class ChatClient():
 
             # Send my name...
             send(self.sock, 'NAME: ' + self.name)
+            # print(self.sock)
+            # print('NAME: ' + self.name)
             data = receive(self.sock)
+            # print(data)
 
             # Contains client address, set it
             addr = data.split('CLIENT: ')[1]

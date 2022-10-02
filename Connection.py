@@ -24,6 +24,7 @@ class Connection(QWidget):
         grid.addWidget(QLabel('Nick Name'), 2, 0)
 
         self.ip_address = QLineEdit()
+        self.ip_address.setText("127.0.0.1")
         self.port = QLineEdit()
         self.nick_name = QLineEdit()
 
@@ -61,6 +62,7 @@ class Connection(QWidget):
         nick_name = self.nick_name.text()
 
         client = ChatClient(host=ip_address, port=port, name=nick_name)
+
 
 
 if __name__ == '__main__':

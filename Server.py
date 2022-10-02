@@ -3,6 +3,7 @@ import socket
 import sys
 import signal
 import argparse
+from datetime import datetime
 
 from Utils import *
 
@@ -41,6 +42,7 @@ class ChatServer(object):
         """ Return the name of the client """
         info = self.clientmap[client]
         host, name = info[0][0], info[1]
+        print(info)
         return '@'.join((name, host))
 
     def run(self):
@@ -89,9 +91,13 @@ class ChatServer(object):
                     # handle all other sockets
                     try:
                         data = receive(sock)
+                        # print("-----------------------------")
+                        # print(data)
                         if data:
                             # Send as new client's message...
-                            msg = f'\n#[{self.get_client_name(sock)}]>> {data}'
+                            current_time = datetime.now().strftime("%H:%M")
+                            msg = f'\n{self.get_client_name(sock).split("@")[0]} ({current_time}) : {data}'
+                            # print(msg)
 
                             # Send data to all except ourself
                             for output in self.outputs:
