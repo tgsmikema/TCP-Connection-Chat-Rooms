@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import select
 import socket
 import sys
@@ -15,6 +17,7 @@ stop_thread = False
 def get_and_send(client):
     while not stop_thread:
         data = sys.stdin.readline().strip()
+        print(data)
         if data:
             send(client.sock, data)
 
@@ -40,7 +43,8 @@ class ChatClient():
             self.connected = True
 
             # Send my name...
-            send(self.sock, 'NAME: ' + self.name)
+            current_time = datetime.now().strftime("%H:%M")
+            send(self.sock,  self.name + ' ; ' + current_time)
             # print(self.sock)
             # print('NAME: ' + self.name)
             data = receive(self.sock)

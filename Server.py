@@ -42,7 +42,7 @@ class ChatServer(object):
         """ Return the name of the client """
         info = self.clientmap[client]
         host, name = info[0][0], info[1]
-        print(info)
+        # print(info)
         return '@'.join((name, host))
 
     def run(self):
@@ -65,14 +65,17 @@ class ChatServer(object):
                     print(
                         f'Chat server: got connection {client.fileno()} from {address}')
                     # Read the login name
-                    cname = receive(client).split('NAME: ')[1]
+                    received_data_initial = receive(client).split(' ; ')
+                    cname = received_data_initial[0]
+                    connection_time = received_data_initial[1]
 
                     # Compute client name and send back
                     self.clients += 1
                     send(client, f'CLIENT: {str(address[0])}')
                     inputs.append(client)
 
-                    self.clientmap[client] = (address, cname)
+                    self.clientmap[client] = (address, cname, connection_time)
+                    print( self.clientmap[client])
                     # Send joining information to other clients
                     msg = f'\n(Connected: New client ({self.clients}) from {self.get_client_name(client)})'
                     for output in self.outputs:
