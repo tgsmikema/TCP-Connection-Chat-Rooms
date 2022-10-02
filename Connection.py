@@ -2,7 +2,10 @@ import socket
 import sys
 
 from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, \
+    QLineEdit, QMessageBox
+
+from Client import ChatClient
 
 
 class Connection(QWidget):
@@ -28,16 +31,36 @@ class Connection(QWidget):
         grid.addWidget(self.port, 1, 1)
         grid.addWidget(self.nick_name, 2, 1)
 
-        connect_btn = QPushButton()
-        cancel_btn = QPushButton()
+        self.connect_btn = QPushButton("Connect")
+        self.cancel_btn = QPushButton("Cancel")
 
+        grid.addWidget(self.connect_btn, 3, 2)
+        self.connect_btn.clicked.connect(self.connecting)
 
+        grid.addWidget(self.cancel_btn, 3, 3)
+        self.cancel_btn.clicked.connect(self.close)
 
-
-
-        self.setWindowTitle('Box Layout')
-        self.setGeometry(300, 300, 300, 400)
+        self.setWindowTitle('Chat Connection')
+        self.setGeometry(300, 300, 800, 500)
         self.show()
+
+
+
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
+                                     QMessageBox.Yes, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+    def connecting(self):
+        ip_address = self.ip_address.text()
+        port = int(self.port.text())
+        nick_name = self.nick_name.text()
+
+        client = ChatClient(host=ip_address, port=port, name=nick_name)
 
 
 if __name__ == '__main__':
