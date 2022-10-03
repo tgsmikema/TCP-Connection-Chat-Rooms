@@ -4,6 +4,8 @@ import sys
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout
 
+from Connection import Connection
+
 
 class main(QWidget):
 
@@ -29,13 +31,19 @@ class main(QWidget):
         vbox.addStretch(1)
 
         cancelButton.clicked.connect(QCoreApplication.instance().quit)
+        helloButton.clicked.connect(ssss)
 
         self.setLayout(vbox)
 
         self.setWindowTitle('Box Layout')
-        self.setGeometry(300, 300, 300, 200)
+        #self.setGeometry(300, 300, 300, 200)
         self.show()
 
+def ssss(self):
+
+    sssd = Connection()
+    self.hide()
+    sssd.show()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

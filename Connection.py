@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVB
     QLineEdit, QMessageBox
 
 from Client import ChatClient
+from Connected import Connected
 
 
 class Connection(QWidget):
@@ -63,6 +64,13 @@ class Connection(QWidget):
 
         client = ChatClient(host=ip_address, port=port, name=nick_name)
 
+        self.ip_address.clear()
+        self.port.clear()
+        self.nick_name.clear()
+
+        self.connected_gui = Connected(prev_gui=self, client=client)
+        self.hide()
+        self.connected_gui.show()
 
 
 if __name__ == '__main__':
