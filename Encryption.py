@@ -19,7 +19,7 @@ class Encryption():
             else:
 
                 cipher_text += str(message_char)
-                return cipher_text
+        return cipher_text
 
     def decrypt(self, cipher_text):
         message = ""
@@ -30,3 +30,9 @@ class Encryption():
             else:
                 message += str(cipher_char)
         return message
+
+if __name__ == '__main__':
+    message = "hi there how are you qingyang?"
+    ciphors = Encryption().encrypt(message)
+    print(ciphors)
+    print(Encryption().decrypt(ciphors))

@@ -1,3 +1,5 @@
+import ssl
+
 import select
 import socket
 import sys
@@ -18,11 +20,15 @@ class ChatServer(object):
         self.clientmap = {}
         self.outputs = []  # list output sockets
 
+        self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        self.context.load_cert_chain('new.pem', 'private.key')
+        self.context.set_ciphers('AES128-SHA')
 
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((SERVER_HOST, port))
         self.server.listen(backlog)
+        self.server = self.context.wrap_socket(self.server, server_side=True)
         # Catch keyboard interrupts
         signal.signal(signal.SIGINT, self.sighandler)
 
@@ -75,7 +81,7 @@ class ChatServer(object):
                     inputs.append(client)
 
                     self.clientmap[client] = (address, cname, connection_time)
-                    print( self.clientmap[client])
+                    print(self.clientmap[client])
                     # Send joining information to other clients
                     msg = f'\n(Connected: New client ({self.clients}) from {self.get_client_name(client)})'
                     for output in self.outputs:

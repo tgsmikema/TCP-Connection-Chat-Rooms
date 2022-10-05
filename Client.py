@@ -1,3 +1,4 @@
+import ssl
 from datetime import datetime
 
 import select
@@ -31,6 +32,8 @@ class ChatClient():
         self.host = host
         self.port = port
 
+        self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+
         # Initial prompt
         self.prompt = f'[{name}@{socket.gethostname()}]> '
         # print(f"host name: {socket.gethostname()}")
@@ -38,6 +41,8 @@ class ChatClient():
         # Connect to server at port
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock = self.context.wrap_socket(self.sock, server_hostname=host)
+
             self.sock.connect((host, self.port))
             print(f'Now connected to chat server@ port {self.port}')
             self.connected = True
