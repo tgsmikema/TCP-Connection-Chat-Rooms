@@ -1,7 +1,8 @@
 import socket
 import sys
+import time
 
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, \
     QLineEdit, QMessageBox, QListWidget
 
@@ -21,8 +22,13 @@ class Connected(QWidget):
         # Connected Clients
         vbox_connected_clients = QVBoxLayout()
         vbox_connected_clients.addWidget(QLabel("Connected Clients"))
-        qlist_connected_clients = QListWidget()
-        vbox_connected_clients.addWidget(qlist_connected_clients)
+        self.qlist_connected_clients = QListWidget()
+        vbox_connected_clients.addWidget(self.qlist_connected_clients)
+
+        self.clientThread = GetClientsThread(self.client)
+        self.clientThread.allClients.connect(self.abcd)
+
+        self.clientThread.start()
 
 
         # Connected Clients Buttons
@@ -66,4 +72,27 @@ class Connected(QWidget):
         self.setWindowTitle('')
         self.setGeometry(200, 200, 600, 600)
 
+    def abcd(self, allClients):
+        for client in allClients:
+            self.qlist_connected_clients.addItem(client[0])
 
+
+class GetClientsThread(QThread):
+    allClients = pyqtSignal(list)
+
+    def __init__(self, client):
+        super().__init__()
+        self.Ready = True
+        self.client = client
+
+    def run(self):
+        while self.Ready:
+            data = self.client.get_client_and_group_list()
+            time.sleep(1)
+            self.allClients.emit(data)
+
+    def stop(self):
+        self.Ready = False
+
+    def restart(self):
+        self.Ready = True

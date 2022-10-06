@@ -20,6 +20,10 @@ class ChatServer(object):
         self.clientmap = {}
         self.outputs = []  # list output sockets
 
+        self.clients_list = []
+        self.groups = 0
+
+
         self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
         self.context.load_cert_chain('new.pem', 'private.key')
         self.context.set_ciphers('AES128-SHA')
@@ -81,6 +85,12 @@ class ChatServer(object):
                     inputs.append(client)
 
                     self.clientmap[client] = (address, cname, connection_time)
+
+
+                    # last field is the 1 to 1 other client cname.
+                    self.clients_list.append([cname, address, connection_time, ""])
+
+
                     print(self.clientmap[client])
                     # Send joining information to other clients
                     msg = f'\n(Connected: New client ({self.clients}) from {self.get_client_name(client)})'
@@ -103,14 +113,19 @@ class ChatServer(object):
                         # print("-----------------------------")
                         # print(data)
                         if data:
-                            # Send as new client's message...
-                            current_time = datetime.now().strftime("%H:%M")
-                            msg = f'\n{self.get_client_name(sock).split("@")[0]} ({current_time}) : {data}'
-                            # print(msg)
 
-                            # Send data to all except ourself
-                            for output in self.outputs:
-                                if output != sock:
+                            if data == "special-command-get-c":
+                                send(sock, self.clients_list)
+
+                            else:
+                                # Send as new client's message...
+                                current_time = datetime.now().strftime("%H:%M")
+                                msg = f'\n{self.get_client_name(sock).split("@")[0]} ({current_time}) : {data}'
+                                # print(msg)
+
+                                # Send data to all except ourself
+                                for output in self.outputs:
+                                    # if output != sock:
                                     send(output, msg)
                         else:
                             print(f'Chat server: {sock.fileno()} hung up')
@@ -118,6 +133,14 @@ class ChatServer(object):
                             sock.close()
                             inputs.remove(sock)
                             self.outputs.remove(sock)
+
+                            # print("----------------------------------------------")
+                            # print(self.get_client_name(sock))
+                            # print(self.get_client_name(sock).split('@')[0])
+
+                            for client_record in self.clients_list:
+                                if self.get_client_name(sock).split('@')[0] == client_record[0]:
+                                    self.clients_list.remove(client_record)
 
                             # Sending client leaving information to others
                             msg = f'\n(Now hung up: Client from {self.get_client_name(sock)})'

@@ -93,7 +93,7 @@ class ChatClient():
                             self.connected = False
                             break
                         else:
-                            sys.stdout.write(data + '\n')
+                            print(data)
                             sys.stdout.flush()
 
             except KeyboardInterrupt:
@@ -102,6 +102,11 @@ class ChatClient():
                 self.cleanup()
                 break
 
+    def get_client_and_group_list(self):
+        send(self.sock, "special-command-get-c")
+        data = receive(self.sock)
+        print(data)
+        return data
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
