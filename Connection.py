@@ -27,7 +27,9 @@ class Connection(QWidget):
         self.ip_address = QLineEdit()
         self.ip_address.setText("127.0.0.1")
         self.port = QLineEdit()
+        self.port.setText("9900")
         self.nick_name = QLineEdit()
+        self.nick_name.setText("mike")
 
         grid.addWidget(self.ip_address, 0, 1)
         grid.addWidget(self.port, 1, 1)

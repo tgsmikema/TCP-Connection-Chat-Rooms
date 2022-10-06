@@ -124,11 +124,11 @@ class ChatServer(object):
                                     time_difference = datetime_now - datetime_connection
                                     total_seconds = time_difference.total_seconds()
                                     if total_seconds < 60:
-                                        client_record[4] = "(now) "
+                                        client_record[4] = "(now)"
                                     elif total_seconds < 3600:
-                                        client_record[4] = f"({math.floor(total_seconds/60)} min ago) "
+                                        client_record[4] = f"({math.floor(total_seconds/60)} min ago)"
                                     else:
-                                        client_record[4] = f"({math.floor(total_seconds/3600)} hour ago) "
+                                        client_record[4] = f"({math.floor(total_seconds/3600)} hour ago)"
 
                                 send(sock, self.clients_list)
 

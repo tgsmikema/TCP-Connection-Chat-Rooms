@@ -1,12 +1,14 @@
 import socket
 import sys
 import time
+import traceback
 
 from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, \
     QLineEdit, QMessageBox, QListWidget
 
 from Client import ChatClient
+import hashlib
 
 
 class Connected(QWidget):
@@ -28,14 +30,12 @@ class Connected(QWidget):
         vbox_connected_clients.addWidget(self.qlist_connected_clients)
 
         self.clientThread = GetClientsThread(self.client)
-        self.clientThread.allClients.connect(self.abcd)
+        self.clientThread.allClients.connect(self.get_all_info_lists)
 
         self.clientThread.start()
 
-
         # Connected Clients Buttons
         chat_1_to_1_btn = QPushButton("1:1 Chat")
-
 
         # Top section
         hbox_top_section = QHBoxLayout()
@@ -74,12 +74,46 @@ class Connected(QWidget):
         self.setWindowTitle('')
         self.setGeometry(200, 200, 600, 600)
 
-    def abcd(self, allClients):
+    def get_all_info_lists(self, allClients):
+
+        if self.qlist_connected_clients.count() > len(allClients):
+            self.qlist_connected_clients.reset()
+            self.qlist_connected_clients.clear()
+
         for client in allClients:
+            is_found = False
             if client[0] == self.client_name:
-                self.qlist_connected_clients.addItem(client[0] + " (me) " + client[4])
+                for i in range(self.qlist_connected_clients.count()):
+                    try:
+
+                        disp_cname = self.qlist_connected_clients.item(i).text().split(" (me) ")[0]
+                        disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" (me) ")[1]
+
+                        if disp_cname == client[0]:
+                            is_found = True
+                            if disp_lapse_time != client[4]:
+                                self.qlist_connected_clients.item(i).setText(client[0] + " (me) " + client[4])
+                    except IndexError:
+                        pass
+                if not is_found:
+                    self.qlist_connected_clients.addItem(client[0] + " (me) " + client[4])
             else:
-                self.qlist_connected_clients.addItem(client[0] + " " + client[4])
+                for i in range(self.qlist_connected_clients.count()):
+                    try:
+
+                        disp_cname = self.qlist_connected_clients.item(i).text().split(" - ")[0]
+
+                        disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" - ")[1]
+
+                        if disp_cname == client[0]:
+                            is_found = True
+                            if disp_lapse_time != client[4]:
+                                self.qlist_connected_clients.item(i).setText(client[0] + " - " + client[4])
+                    except IndexError:
+                        pass
+                if not is_found:
+                    self.qlist_connected_clients.addItem(client[0] + " - " + client[4])
+
 
 
 class GetClientsThread(QThread):
@@ -93,8 +127,12 @@ class GetClientsThread(QThread):
     def run(self):
         while self.Ready:
             data = self.client.get_client_and_group_list()
-            time.sleep(1)
-            self.allClients.emit(data)
+            time.sleep(0.2)
+            try:
+                # print(data)
+                self.allClients.emit(data)
+            except TypeError as e:
+                pass
 
     def stop(self):
         self.Ready = False

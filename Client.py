@@ -105,7 +105,7 @@ class ChatClient():
     def get_client_and_group_list(self):
         send(self.sock, "special-command-get-c")
         data = receive(self.sock)
-        print(data)
+        # print(data)
         return data
 
     def get_own_name(self):
