@@ -108,6 +108,12 @@ class ChatClient():
         print(data)
         return data
 
+    def get_own_name(self):
+        send(self.sock, "special-command-get-own-name")
+        data = receive(self.sock)
+        print(data)
+        return data
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', action="store", dest="name", required=True)

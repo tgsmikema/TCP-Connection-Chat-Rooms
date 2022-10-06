@@ -1,3 +1,4 @@
+import math
 import ssl
 
 import select
@@ -88,7 +89,7 @@ class ChatServer(object):
 
 
                     # last field is the 1 to 1 other client cname.
-                    self.clients_list.append([cname, address, connection_time, ""])
+                    self.clients_list.append([cname, address, connection_time, "", ""])
 
 
                     print(self.clientmap[client])
@@ -115,7 +116,25 @@ class ChatServer(object):
                         if data:
 
                             if data == "special-command-get-c":
+                                current_time = datetime.now().strftime("%H:%M")
+                                time_format = "%H:%M"
+                                datetime_now = datetime.strptime(current_time, time_format)
+                                for client_record in self.clients_list:
+                                    datetime_connection = datetime.strptime(client_record[2], time_format)
+                                    time_difference = datetime_now - datetime_connection
+                                    total_seconds = time_difference.total_seconds()
+                                    if total_seconds < 60:
+                                        client_record[4] = "(now) "
+                                    elif total_seconds < 3600:
+                                        client_record[4] = f"({math.floor(total_seconds/60)} min ago) "
+                                    else:
+                                        client_record[4] = f"({math.floor(total_seconds/3600)} hour ago) "
+
                                 send(sock, self.clients_list)
+
+                            elif data == "special-command-get-own-name":
+                                own_name = self.get_client_name(sock).split("@")[0]
+                                send(sock, own_name)
 
                             else:
                                 # Send as new client's message...

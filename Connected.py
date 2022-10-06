@@ -19,6 +19,8 @@ class Connected(QWidget):
 
     def initUI(self):
 
+        self.client_name = self.client.get_own_name()
+
         # Connected Clients
         vbox_connected_clients = QVBoxLayout()
         vbox_connected_clients.addWidget(QLabel("Connected Clients"))
@@ -74,7 +76,10 @@ class Connected(QWidget):
 
     def abcd(self, allClients):
         for client in allClients:
-            self.qlist_connected_clients.addItem(client[0])
+            if client[0] == self.client_name:
+                self.qlist_connected_clients.addItem(client[0] + " (me) " + client[4])
+            else:
+                self.qlist_connected_clients.addItem(client[0] + " " + client[4])
 
 
 class GetClientsThread(QThread):
