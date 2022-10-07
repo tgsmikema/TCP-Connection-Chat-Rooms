@@ -136,6 +136,11 @@ class ChatServer(object):
                                 own_name = self.get_client_name(sock).split("@")[0]
                                 send(sock, own_name)
 
+                            elif data == "special-command-create-new-room":
+                                own_name = self.get_client_name(sock).split("@")[0]
+                                self.groups += 1
+                                self.groups_list.append([f"Room{self.groups}", f"{own_name}"])
+
                             else:
                                 # Send as new client's message...
                                 current_time = datetime.now().strftime("%H:%M")

@@ -23,6 +23,7 @@ class Connected(QWidget):
 
         self.client_name = self.client.get_own_name()
 
+
         # Connected Clients
         vbox_connected_clients = QVBoxLayout()
         vbox_connected_clients.addWidget(QLabel("Connected Clients"))
@@ -48,12 +49,13 @@ class Connected(QWidget):
         # Chat Rooms
         vbox_chat_rooms = QVBoxLayout()
         vbox_chat_rooms.addWidget(QLabel("Chat rooms (Group chat)"))
-        qlist_chat_rooms = QListWidget()
-        vbox_chat_rooms.addWidget(qlist_chat_rooms)
+        self.qlist_chat_rooms = QListWidget()
+        vbox_chat_rooms.addWidget(self.qlist_chat_rooms)
 
         # Chat room buttons
         vbox_room_buttons = QVBoxLayout()
         room_create_btn = QPushButton("Create")
+        room_create_btn.clicked.connect(self.create_room)
         room_join_btn = QPushButton("Join")
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
@@ -88,9 +90,18 @@ class Connected(QWidget):
         else:
             self.selected_client_name = ""
 
+        if self.qlist_chat_rooms.currentRow() != -1:
+            self.selected_chat_room_name = self.qlist_chat_rooms.currentItem().text().split(" - ")[0]
+        else:
+            self.selected_chat_room_name = ""
+
         if self.qlist_connected_clients.count() > len(all_client):
             self.qlist_connected_clients.reset()
             self.qlist_connected_clients.clear()
+
+        if self.qlist_chat_rooms.count() > len(all_group):
+            self.qlist_chat_rooms.reset()
+            self.qlist_chat_rooms.clear()
 
         for client in all_client:
             is_found = False
@@ -126,6 +137,19 @@ class Connected(QWidget):
                 if not is_found:
                     self.qlist_connected_clients.addItem(client[0] + " - " + client[4])
 
+        for room in all_group:
+            is_found_room = False
+            for i in range(self.qlist_chat_rooms.count()):
+                try:
+                    disp_rname = self.qlist_chat_rooms.item(i).text().split(" by ")[0]
+                    disp_owner_name = self.qlist_chat_rooms.item(i).text().split(" by ")[1]
+                    if disp_rname == room[0]:
+                        is_found_room = True
+                except IndexError:
+                    pass
+            if not is_found_room:
+                self.qlist_chat_rooms.addItem(room[0] + " by " + room[1])
+
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
@@ -140,6 +164,9 @@ class Connected(QWidget):
         self.client.cleanup()
         self.hide()
         self.prev_gui.show()
+
+    def create_room(self):
+        self.client.create_new_room()
 
 
 class GetClientsThread(QThread):

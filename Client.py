@@ -114,6 +114,9 @@ class ChatClient():
         print(data)
         return data
 
+    def create_new_room(self):
+        send(self.sock, "special-command-create-new-room")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', action="store", dest="name", required=True)
