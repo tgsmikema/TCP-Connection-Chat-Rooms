@@ -27,6 +27,9 @@ class Connected(QWidget):
         vbox_connected_clients = QVBoxLayout()
         vbox_connected_clients.addWidget(QLabel("Connected Clients"))
         self.qlist_connected_clients = QListWidget()
+
+        # self.selected_client_index = self.qlist_connected_clients.selectionChanged()
+
         vbox_connected_clients.addWidget(self.qlist_connected_clients)
 
         self.clientThread = GetClientsThread(self.client)
@@ -79,6 +82,11 @@ class Connected(QWidget):
 
         all_client = all_clients_and_groups[0]
         all_group = all_clients_and_groups[1]
+
+        if self.qlist_connected_clients.currentRow() != -1:
+            self.selected_client_name = self.qlist_connected_clients.currentItem().text().split(" - ")[0]
+        else:
+            self.selected_client_name = ""
 
         if self.qlist_connected_clients.count() > len(all_client):
             self.qlist_connected_clients.reset()
