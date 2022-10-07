@@ -23,6 +23,7 @@ class ChatServer(object):
 
         self.clients_list = []
         self.groups = 0
+        self.groups_list = []
 
 
         self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
@@ -129,8 +130,7 @@ class ChatServer(object):
                                         client_record[4] = f"({math.floor(total_seconds/60)} min ago)"
                                     else:
                                         client_record[4] = f"({math.floor(total_seconds/3600)} hour ago)"
-
-                                send(sock, self.clients_list)
+                                send(sock, [self.clients_list, self.groups_list])
 
                             elif data == "special-command-get-own-name":
                                 own_name = self.get_client_name(sock).split("@")[0]

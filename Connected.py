@@ -30,7 +30,7 @@ class Connected(QWidget):
         vbox_connected_clients.addWidget(self.qlist_connected_clients)
 
         self.clientThread = GetClientsThread(self.client)
-        self.clientThread.allClients.connect(self.get_all_info_lists)
+        self.clientThread.all_clients_and_groups.connect(self.get_all_info_lists)
 
         self.clientThread.start()
 
@@ -53,6 +53,7 @@ class Connected(QWidget):
         room_create_btn = QPushButton("Create")
         room_join_btn = QPushButton("Join")
         close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.close)
         vbox_room_buttons.addStretch(1)
         vbox_room_buttons.addWidget(room_create_btn)
         vbox_room_buttons.addWidget(room_join_btn)
@@ -74,29 +75,32 @@ class Connected(QWidget):
         self.setWindowTitle('')
         self.setGeometry(200, 200, 600, 600)
 
-    def get_all_info_lists(self, allClients):
+    def get_all_info_lists(self, all_clients_and_groups):
 
-        if self.qlist_connected_clients.count() > len(allClients):
+        all_client = all_clients_and_groups[0]
+        all_group = all_clients_and_groups[1]
+
+        if self.qlist_connected_clients.count() > len(all_client):
             self.qlist_connected_clients.reset()
             self.qlist_connected_clients.clear()
 
-        for client in allClients:
+        for client in all_client:
             is_found = False
             if client[0] == self.client_name:
                 for i in range(self.qlist_connected_clients.count()):
                     try:
 
-                        disp_cname = self.qlist_connected_clients.item(i).text().split(" (me) ")[0]
-                        disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" (me) ")[1]
+                        disp_cname = self.qlist_connected_clients.item(i).text().split(" - (me) ")[0]
+                        disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" - (me) ")[1]
 
                         if disp_cname == client[0]:
                             is_found = True
                             if disp_lapse_time != client[4]:
-                                self.qlist_connected_clients.item(i).setText(client[0] + " (me) " + client[4])
+                                self.qlist_connected_clients.item(i).setText(client[0] + " - (me) " + client[4])
                     except IndexError:
                         pass
                 if not is_found:
-                    self.qlist_connected_clients.addItem(client[0] + " (me) " + client[4])
+                    self.qlist_connected_clients.addItem(client[0] + " - (me) " + client[4])
             else:
                 for i in range(self.qlist_connected_clients.count()):
                     try:
@@ -114,10 +118,24 @@ class Connected(QWidget):
                 if not is_found:
                     self.qlist_connected_clients.addItem(client[0] + " - " + client[4])
 
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
+                                     QMessageBox.Yes, QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
+
+    def close(self):
+        self.clientThread.stop()
+        self.client.cleanup()
+        self.hide()
+        self.prev_gui.show()
 
 
 class GetClientsThread(QThread):
-    allClients = pyqtSignal(list)
+    all_clients_and_groups = pyqtSignal(list)
 
     def __init__(self, client):
         super().__init__()
@@ -130,7 +148,7 @@ class GetClientsThread(QThread):
             time.sleep(0.2)
             try:
                 # print(data)
-                self.allClients.emit(data)
+                self.all_clients_and_groups.emit(data)
             except TypeError as e:
                 pass
 
