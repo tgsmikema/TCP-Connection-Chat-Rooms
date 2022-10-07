@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVB
 from Client import ChatClient
 import hashlib
 
+from OneToOneChat import OneToOneChat
+
 
 class Connected(QWidget):
 
@@ -22,7 +24,6 @@ class Connected(QWidget):
     def initUI(self):
 
         self.client_name = self.client.get_own_name()
-
 
         # Connected Clients
         vbox_connected_clients = QVBoxLayout()
@@ -40,6 +41,7 @@ class Connected(QWidget):
 
         # Connected Clients Buttons
         chat_1_to_1_btn = QPushButton("1:1 Chat")
+        chat_1_to_1_btn.clicked.connect(self.one_to_one_chat)
 
         # Top section
         hbox_top_section = QHBoxLayout()
@@ -81,6 +83,8 @@ class Connected(QWidget):
         self.setGeometry(200, 200, 600, 600)
 
     def get_all_info_lists(self, all_clients_and_groups):
+
+        # print(all_clients_and_groups)
 
         all_client = all_clients_and_groups[0]
         all_group = all_clients_and_groups[1]
@@ -161,12 +165,28 @@ class Connected(QWidget):
 
     def close(self):
         self.clientThread.stop()
+        time.sleep(0.3)
         self.client.cleanup()
         self.hide()
         self.prev_gui.show()
 
     def create_room(self):
         self.client.create_new_room()
+
+    def one_to_one_chat(self, client):
+
+        if self.selected_client_name == "":
+            # print("you have to select at least one")
+            QMessageBox.warning(self, 'Error!', 'you have to select at least one user')
+        elif self.selected_client_name == self.client_name:
+            # print("you cannot chat to yourself")
+            QMessageBox.warning(self, 'Error!', 'you cannot chat to yourself')
+        else:
+            self.clientThread.stop()
+            time.sleep(0.3)
+            self.one_to_one = OneToOneChat(self.client, self.client_name, self.selected_client_name, self, self.clientThread)
+            self.hide()
+            self.one_to_one.show()
 
 
 class GetClientsThread(QThread):
@@ -181,11 +201,12 @@ class GetClientsThread(QThread):
         while self.Ready:
             data = self.client.get_client_and_group_list()
             time.sleep(0.2)
-            try:
-                # print(data)
-                self.all_clients_and_groups.emit(data)
-            except TypeError as e:
-                pass
+            if len(data) > 1:
+                try:
+                    # print(data)
+                    self.all_clients_and_groups.emit(data)
+                except TypeError as e:
+                    pass
 
     def stop(self):
         self.Ready = False

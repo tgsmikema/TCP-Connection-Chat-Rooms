@@ -16,9 +16,10 @@ stop_thread = False
 
 
 def get_and_send(client):
+    # send(client.sock, ["chat","mikesss","hhhi"])
     while not stop_thread:
         data = sys.stdin.readline().strip()
-        print(data)
+        # print(data)
         if data:
             send(client.sock, data)
 
@@ -59,6 +60,7 @@ class ChatClient():
             addr = data.split('CLIENT: ')[1]
             self.prompt = '[' + '@'.join((self.name, addr)) + ']> '
 
+            # threading.Thread(target=get_and_send, args=(self,)).start()
             threading.Thread(args=(self,)).start()
 
         except socket.error as e:
@@ -93,7 +95,7 @@ class ChatClient():
                             self.connected = False
                             break
                         else:
-                            print(data)
+                            # print(data)
                             sys.stdout.flush()
 
             except KeyboardInterrupt:
@@ -111,11 +113,18 @@ class ChatClient():
     def get_own_name(self):
         send(self.sock, "special-command-get-own-name")
         data = receive(self.sock)
-        print(data)
+        # print(data)
         return data
 
     def create_new_room(self):
         send(self.sock, "special-command-create-new-room")
+
+    def send_message(self, message):
+        send(self.sock, message)
+
+    def receive_message(self):
+        data = receive(self.sock)
+        return data
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

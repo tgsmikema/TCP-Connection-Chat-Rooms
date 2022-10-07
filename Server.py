@@ -7,6 +7,7 @@ import sys
 import signal
 import argparse
 from datetime import datetime
+import time
 
 from Utils import *
 
@@ -25,6 +26,7 @@ class ChatServer(object):
         self.groups = 0
         self.groups_list = []
 
+        self.all_chat_messages = []
 
         self.context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
         self.context.load_cert_chain('new.pem', 'private.key')
@@ -88,10 +90,8 @@ class ChatServer(object):
 
                     self.clientmap[client] = (address, cname, connection_time)
 
-
                     # last field is the 1 to 1 other client cname.
                     self.clients_list.append([cname, address, connection_time, "", ""])
-
 
                     print(self.clientmap[client])
                     # Send joining information to other clients
@@ -127,9 +127,9 @@ class ChatServer(object):
                                     if total_seconds < 60:
                                         client_record[4] = "(now)"
                                     elif total_seconds < 3600:
-                                        client_record[4] = f"({math.floor(total_seconds/60)} min ago)"
+                                        client_record[4] = f"({math.floor(total_seconds / 60)} min ago)"
                                     else:
-                                        client_record[4] = f"({math.floor(total_seconds/3600)} hour ago)"
+                                        client_record[4] = f"({math.floor(total_seconds / 3600)} hour ago)"
                                 send(sock, [self.clients_list, self.groups_list])
 
                             elif data == "special-command-get-own-name":
@@ -141,6 +141,31 @@ class ChatServer(object):
                                 self.groups += 1
                                 self.groups_list.append([f"Room{self.groups}", f"{own_name}"])
 
+                            elif type(data) == list:
+                                print(f"----{data}--------")
+                                if data[0] == "chat":
+                                    send_socks = []
+                                    for client in self.clientmap:
+                                        if self.clientmap[client][1] == data[1] or self.clientmap[client][1] == data[2]:
+                                            send_socks.append(client)
+
+                                    current_time = datetime.now().strftime("%H:%M")
+                                    msg = data[3]
+
+                                    # print(send_socks)
+                                    for output_sock in send_socks:
+                                        # if it's the sender
+                                        message = ""
+                                        if self.clientmap[output_sock][1] == data[1]:
+                                            message = f"Me ({current_time}):  {msg}"
+                                        else:
+                                            message = f"{data[1]} ({current_time}):  {msg}"
+                                        # print([message])
+                                        send(output_sock, [message])
+
+                                elif data[0] == "group":
+                                    pass
+
                             else:
                                 # Send as new client's message...
                                 current_time = datetime.now().strftime("%H:%M")
@@ -148,9 +173,9 @@ class ChatServer(object):
                                 # print(msg)
 
                                 # Send data to all except ourself
-                                for output in self.outputs:
-                                    # if output != sock:
-                                    send(output, msg)
+                                # for output in self.outputs:
+                                #     # if output != sock:
+                                #     send(output, msg)
                         else:
                             print(f'Chat server: {sock.fileno()} hung up')
                             self.clients -= 1
@@ -175,6 +200,11 @@ class ChatServer(object):
                         # Remove
                         inputs.remove(sock)
                         self.outputs.remove(sock)
+                        self.clients -= 1
+                        sock.close()
+                        for client_record in self.clients_list:
+                            if self.get_client_name(sock).split('@')[0] == client_record[0]:
+                                self.clients_list.remove(client_record)
 
         self.server.close()
 
