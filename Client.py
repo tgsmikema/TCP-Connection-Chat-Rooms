@@ -59,7 +59,7 @@ class ChatClient():
             addr = data.split('CLIENT: ')[1]
             self.prompt = '[' + '@'.join((self.name, addr)) + ']> '
 
-            threading.Thread(target=get_and_send, args=(self,)).start()
+            threading.Thread(args=(self,)).start()
 
         except socket.error as e:
             print(f'Failed to connect to chat server @ port {self.port}')

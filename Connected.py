@@ -128,7 +128,7 @@ class Connected(QWidget):
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
-                                     QMessageBox.Yes, QMessageBox.No)
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             event.accept()
