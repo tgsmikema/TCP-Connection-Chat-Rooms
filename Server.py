@@ -142,7 +142,7 @@ class ChatServer(object):
                                 self.groups_list.append([f"Room{self.groups}", f"{own_name}"])
 
                             elif type(data) == list:
-                                print(f"----{data}--------")
+                                # print(f"----{data}--------")
                                 if data[0] == "chat":
                                     send_socks = []
                                     for client in self.clientmap:

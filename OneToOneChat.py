@@ -19,6 +19,7 @@ class OneToOneChat(QWidget):
         self.client_name = client_name
         self.other_client_name = other_client_name
         self.client_thread = client_thread
+        self.message_html = ""
         self.initUI()
 
     def initUI(self):
@@ -76,7 +77,10 @@ class OneToOneChat(QWidget):
         # txt = str(doc).split('\n')
         # print(txt)
         if type(messages[0]) == str:
-            self.message_browser.append(messages[0])
+            self.message_html += f'<p>{messages[0]}</p><br>'
+            # self.message_html += '<img src="111.png">'
+            # self.message_browser.append(messages[0])
+            self.message_browser.setHtml(self.message_html)
 
     def send_message(self):
         msg = self.chat_message_box.text()
@@ -106,8 +110,16 @@ class OneToOneChat(QWidget):
         self.prev_gui.show()
         self.client_thread.restart()
         self.client_thread.start()
+        self.message_html = ""
 
+    def closeEvent(self, event):
+        reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
+                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
+        if reply == QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
 #
 # if __name__ == '__main__':
