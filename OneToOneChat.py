@@ -62,6 +62,7 @@ class OneToOneChat(QWidget):
         # Close Button
         close_btn = QPushButton("Close")
         close_btn.setFont(QFont('Times', 14))
+        close_btn.clicked.connect(self.close)
         vbox_entire_screen.addWidget(close_btn)
 
         self.setLayout(vbox_entire_screen)
@@ -89,6 +90,24 @@ class OneToOneChat(QWidget):
             data.append(msg)
             self.client.send_message(data)
             self.chat_message_box.clear()
+
+    def close(self):
+        self.receive_msg_thread.stop()
+
+        msg = "I HAVE ALREADY QUIT THIS CHAT, BYE!~"
+        data = []
+        data.append("chat")
+        data.append(self.client_name)
+        data.append(self.other_client_name)
+        data.append(msg)
+        self.client.send_message(data)
+
+        self.hide()
+        self.prev_gui.show()
+        self.client_thread.restart()
+        self.client_thread.start()
+
+
 
 #
 # if __name__ == '__main__':
