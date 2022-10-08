@@ -163,6 +163,34 @@ class ChatServer(object):
                                         # print([message])
                                         send(output_sock, [message])
 
+                                elif data[0] == "chat-img":
+                                    # print("-------------------------------")
+                                    # print(data)
+                                    send_socks = []
+                                    for client in self.clientmap:
+                                        if self.clientmap[client][1] == data[2] or self.clientmap[client][1] == data[3]:
+                                            send_socks.append(client)
+
+                                    current_time = datetime.now().strftime("%H:%M")
+                                    img_data = data[4]
+
+                                    # print(send_socks)
+                                    for output_sock in send_socks:
+                                        # if it's the sender
+                                        message = ""
+                                        if self.clientmap[output_sock][1] == data[2]:
+                                            message = f"Me ({current_time}):  Sent Image"
+                                        else:
+                                            message = f"{data[2]} ({current_time}):  Sent Image"
+                                        # print([message])
+                                        reply_data = []
+                                        reply_data.append(img_data)
+                                        reply_data.append(message)
+                                        reply_data.append(data[1])
+                                        reply_data.append(data[5])
+                                        # print(reply_data)
+                                        send(output_sock, reply_data)
+
                                 elif data[0] == "group":
                                     pass
 
@@ -197,6 +225,7 @@ class ChatServer(object):
                             for output in self.outputs:
                                 send(output, msg)
                     except socket.error as e:
+                        # print(e)
                         # Remove
                         inputs.remove(sock)
                         self.outputs.remove(sock)
