@@ -44,7 +44,7 @@ class OneToOneChat(QWidget):
         vbox_entire_screen.addWidget(chat_with_label)
         vbox_entire_screen.addWidget(self.message_browser)
 
-        self.message_browser.setIconSize(QtCore.QSize(100, 100))
+        self.message_browser.setIconSize(QtCore.QSize(200, 200))
 
 
         self.receive_msg_thread = ReceiveMessageThread(self.client)
@@ -94,10 +94,10 @@ class OneToOneChat(QWidget):
 
             self.message_browser.addItem(messages[0])
 
-            img = QListWidgetItem()
-            img.setIcon(QIcon("111.png"))
-            img.setSizeHint(QSize(100, 100))
-            self.message_browser.addItem(img)
+            # img = QListWidgetItem()
+            # img.setIcon(QIcon("111.png"))
+            # img.setSizeHint(QSize(100, 100))
+            # self.message_browser.addItem(img)
 
         elif len(messages) == 4:
             self.file_size += len(messages[0])
@@ -107,10 +107,17 @@ class OneToOneChat(QWidget):
                 # message[2] file_name
                 image_file = open(f"{messages[2]}", "wb")
                 image_file.write(self.original_file_b_data)
+                time.sleep(0.2)
                 image_file.close()
                 self.original_file_b_data = b''
                 self.file_size = 0
 
+                img = QListWidgetItem()
+                img.setIcon(QIcon(f"{messages[2]}"))
+                img.setSizeHint(QSize(200, 200))
+
+                self.message_browser.addItem(messages[1])
+                self.message_browser.addItem(img)
 
 
 
@@ -122,6 +129,8 @@ class OneToOneChat(QWidget):
             self.filenames = self.dlg.selectedFiles()
             # print(self.filenames)
             f = open(self.filenames[0], 'rb')
+            extension = self.filenames[0].split(".")
+            extension_name = "." + extension[len(extension)-1]
             # print(f)
 
             with f:
@@ -130,7 +139,7 @@ class OneToOneChat(QWidget):
 
             sent_file_size = len(img_data)
 
-            n = 10000
+            n = 5000
             img_data_list = [img_data[i:i + n] for i in range(0, len(img_data), n)]
             # print(len(img_data_list))
             # print(img_data_list[0])
@@ -141,7 +150,7 @@ class OneToOneChat(QWidget):
                 data = []
                 data.append("chat-img")
                 filename = str(uuid.uuid4())
-                data.append(filename + ".png")
+                data.append(filename + extension_name)
                 data.append(self.client_name)
                 data.append(self.other_client_name)
                 data.append(data_element)
