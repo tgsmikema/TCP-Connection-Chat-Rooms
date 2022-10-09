@@ -416,7 +416,7 @@ class RoomMessageThread(QThread):
         while self.ready:
             try:
                 data = self.client.receive_message()
-                if type(data[0]) == str:
+                if type(data[0]) != list:
                     self.messages.emit(data)
                 else:
                     self.member_messages.emit(data)
