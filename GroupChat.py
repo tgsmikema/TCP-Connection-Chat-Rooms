@@ -163,11 +163,83 @@ class GroupChat(QWidget):
 
     def update_room_members(self, member_messages):
 
+        current_room = None
 
         if "127.0.0.1" in str(member_messages):
-            print("WRONG!")
+            pass
         else:
-            print(member_messages)
+            for room in member_messages:
+                if room[0][0] == self.group_name:
+                    current_room = room
+
+            if current_room is not None:
+                room_owner = current_room[0][1]
+
+                members = current_room[1]
+
+                # print("___________________")
+                # print(room_owner)
+                # print(members)
+
+                if self.members_list.count() > len(members):
+                    self.members_list.reset()
+                    self.members_list.clear()
+
+                for member in members:
+                    is_found = False
+                    if (member == room_owner) and (member != self.client_name):
+                        for i in range(self.members_list.count()):
+                            try:
+                                disp_member_name = self.members_list.item(i).text().split(" (host)")[0]
+                                # print(f"1 + {disp_member_name}")
+                                if disp_member_name == member:
+                                    is_found = True
+                            except IndexError:
+                                pass
+                        if self.members_list.count() == 0:
+                            self.members_list.addItem(member + " (host)")
+                        elif not is_found:
+                            self.members_list.addItem(member + " (host)")
+                    elif (member != room_owner) and (member == self.client_name):
+                        for i in range(self.members_list.count()):
+                            try:
+                                disp_member_name = self.members_list.item(i).text().split(" (me)")[0]
+                                # print(f"2 + {disp_member_name}")
+                                if disp_member_name == member:
+                                    is_found = True
+                            except IndexError:
+                                pass
+                        if self.members_list.count() == 0:
+                            self.members_list.addItem(member + " (me)")
+                        elif not is_found:
+                            self.members_list.addItem(member + " (me)")
+                    elif (member == room_owner) and (member == self.client_name):
+                        for i in range(self.members_list.count()):
+                            try:
+                                disp_member_name = self.members_list.item(i).text().split(" (host)")[0]
+                                # print(f"3 + {disp_member_name}")
+                                if disp_member_name == member:
+                                    is_found = True
+                            except IndexError:
+                                pass
+                        if self.members_list.count() == 0:
+                            self.members_list.addItem(member + " (host) (me)")
+                        elif not is_found:
+                            self.members_list.addItem(member + " (host) (me)")
+                    else:
+                        for i in range(self.members_list.count()):
+                            try:
+                                disp_member_name = self.members_list.item(i).text()
+                                # print(f"4 + {disp_member_name}")
+                                if disp_member_name == member:
+                                    is_found = True
+                            except IndexError:
+                                pass
+                        if self.members_list.count() == 0:
+                            self.members_list.addItem(member)
+                        elif not is_found:
+                            self.members_list.addItem(member)
+
 
 
     def update_chat_message_record(self, messages):
@@ -349,6 +421,8 @@ class RoomMessageThread(QThread):
                 else:
                     self.member_messages.emit(data)
             except TypeError as e:
+                pass
+            except IndexError as e:
                 pass
 
     def stop(self):
