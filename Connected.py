@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVB
 from Client import ChatClient
 import hashlib
 
+from GroupChat import GroupChat
 from OneToOneChat import OneToOneChat
 
 
@@ -147,12 +148,12 @@ class Connected(QWidget):
                 try:
                     disp_rname = self.qlist_chat_rooms.item(i).text().split(" by ")[0]
                     disp_owner_name = self.qlist_chat_rooms.item(i).text().split(" by ")[1]
-                    if disp_rname == room[0]:
+                    if disp_rname == room[0][0]:
                         is_found_room = True
                 except IndexError:
                     pass
             if not is_found_room:
-                self.qlist_chat_rooms.addItem(room[0] + " by " + room[1])
+                self.qlist_chat_rooms.addItem(room[0][0] + " by " + room[0][1])
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
@@ -187,6 +188,19 @@ class Connected(QWidget):
             self.one_to_one = OneToOneChat(self.client, self.client_name, self.selected_client_name, self, self.clientThread)
             self.hide()
             self.one_to_one.show()
+
+    # Transition to Group Chat Rooms
+    def group_chat(self, client):
+
+        if self.selected_client_name == "":
+            # print("you have to select at least one")
+            QMessageBox.warning(self, 'Error!', 'you have to select at least one user')
+        else:
+            self.clientThread.stop()
+            time.sleep(0.3)
+            self.group_chat_room = GroupChat(self.client, self.client_name, self.selected_chat_room_name, self, self.clientThread)
+            self.hide()
+            self.group_chat_room.show()
 
 
 class GetClientsThread(QThread):

@@ -139,7 +139,13 @@ class ChatServer(object):
                             elif data == "special-command-create-new-room":
                                 own_name = self.get_client_name(sock).split("@")[0]
                                 self.groups += 1
-                                self.groups_list.append([f"Room{self.groups}", f"{own_name}"])
+                                group_room = []
+                                group_room.append([f"Room{self.groups}", f"{own_name}"])
+                                group_room.append([])
+                                self.groups_list.append(group_room)
+
+                            elif data == "special-command-get-group-list":
+                                pass
 
                             elif type(data) == list:
                                 # print(f"----{data}--------")
@@ -191,8 +197,27 @@ class ChatServer(object):
                                         # print(reply_data)
                                         send(output_sock, reply_data)
 
-                                elif data[0] == "group":
-                                    pass
+                                elif data[0] == "group-register":
+                                    group_name = data[1]
+                                    client_name = data[2]
+
+                                    for group_room in self.groups_list:
+                                        if group_name == group_room[0][0]:
+                                            if client_name in group_room[1]:
+                                                pass
+                                            else:
+                                                group_room[1].append(client_name)
+
+                                elif data[0] == "group-deregister":
+                                    group_name = data[1]
+                                    client_name = data[2]
+
+                                    for group_room in self.groups_list:
+                                        if group_name == group_room[0][0]:
+                                            if client_name in group_room[1]:
+                                                group_room[1].remove(client_name)
+
+
 
                             else:
                                 # Send as new client's message...
@@ -218,6 +243,13 @@ class ChatServer(object):
                             for client_record in self.clients_list:
                                 if self.get_client_name(sock).split('@')[0] == client_record[0]:
                                     self.clients_list.remove(client_record)
+
+                            # remove offline clients from groups
+                            for i in range(len(self.groups_list)):
+                                client_name = self.get_client_name(sock).split('@')[0]
+                                if client_name in self.groups_list[1]:
+                                    self.groups_list[1].remove(client_name)
+
 
                             # Sending client leaving information to others
                             msg = f'\n(Now hung up: Client from {self.get_client_name(sock)})'

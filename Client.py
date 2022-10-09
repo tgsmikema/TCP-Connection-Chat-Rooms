@@ -119,6 +119,12 @@ class ChatClient():
     def create_new_room(self):
         send(self.sock, "special-command-create-new-room")
 
+    def join_new_room(self, message):
+        send(self.sock, message)
+
+    def leave_room(self, message):
+        send(self.sock, message)
+
     def send_message(self, message):
         send(self.sock, message)
 
