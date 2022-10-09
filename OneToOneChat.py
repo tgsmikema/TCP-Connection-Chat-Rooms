@@ -6,13 +6,14 @@ import time
 import uuid
 
 from PyQt5.QtCore import QCoreApplication, QThread, pyqtSignal, QSize
-from PyQt5.QtGui import QFont, QIcon, QPixmap
+from PyQt5.QtGui import QFont, QIcon, QPixmap, QBrush, QColor
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QGridLayout, QLabel, \
     QLineEdit, QMessageBox, QListWidget, QTextBrowser, QTextEdit, QListWidgetItem, QFileDialog
 from PyQt5 import QtWidgets, QtCore
 from PyQt5 import QtGui
 
 from Client import ChatClient
+from PictureViewer import PictureViewer
 
 
 class OneToOneChat(QWidget):
@@ -36,6 +37,9 @@ class OneToOneChat(QWidget):
         self.file_size = 0
         self.original_file_b_data = b''
 
+        self.selected_file_name = ""
+
+
         # top part
         chat_with_label = QLabel(f"Chat with {self.other_client_name}")
         chat_with_label.setFont(QFont('Times', 14))
@@ -44,6 +48,8 @@ class OneToOneChat(QWidget):
         vbox_entire_screen.addWidget(chat_with_label)
         vbox_entire_screen.addWidget(self.message_browser)
 
+        self.message_browser.selectionModel().selectionChanged.connect(self.on_row_changed)
+
         self.message_browser.setIconSize(QtCore.QSize(200, 200))
 
 
@@ -51,6 +57,15 @@ class OneToOneChat(QWidget):
         self.receive_msg_thread.messages.connect(self.update_chat_message_record)
 
         self.receive_msg_thread.start()
+
+        # Picture Buttons
+        view_pic_btn = QPushButton("View Selected Picture")
+        view_pic_btn.clicked.connect(self.view_image)
+        download_pic_button = QPushButton("Download Selected Picture")
+        hbox_pic = QHBoxLayout()
+
+        hbox_pic.addWidget(view_pic_btn)
+        hbox_pic.addWidget(download_pic_button)
 
         # sending message part
         hbox_send_message = QHBoxLayout()
@@ -71,6 +86,7 @@ class OneToOneChat(QWidget):
         hbox_send_message.addWidget(send_text_btn)
         hbox_send_message.addWidget(send_img_btn)
 
+        vbox_entire_screen.addLayout(hbox_pic)
         vbox_entire_screen.addLayout(hbox_send_message)
 
         # Close Button
@@ -85,6 +101,23 @@ class OneToOneChat(QWidget):
         self.setWindowTitle('')
         self.setGeometry(200, 200, 600, 600)
         # self.show()
+
+
+    def view_image(self):
+        # print(f"--------{self.selected_file_name}---------")
+        if self.selected_file_name != "":
+            self.dialog = PictureViewer(self.selected_file_name)
+            self.dialog.show()
+    def on_row_changed(self, current, previous):
+
+        current_text = self.message_browser.currentItem().text()
+
+        if (".jpg" in current_text) or (".png" in current_text):
+            self.selected_file_name = current_text
+        else:
+            self.selected_file_name = ""
+
+        print(self.selected_file_name)
 
     def update_chat_message_record(self, messages):
 
@@ -113,7 +146,10 @@ class OneToOneChat(QWidget):
                 self.file_size = 0
 
                 img = QListWidgetItem()
+                # apply transparent color to texts
+                img.setForeground(QColor(255, 255, 255, 0))
                 img.setIcon(QIcon(f"{messages[2]}"))
+                img.setText(f"{messages[2]}")
                 img.setSizeHint(QSize(200, 200))
 
                 self.message_browser.addItem(messages[1])
@@ -198,6 +234,7 @@ class OneToOneChat(QWidget):
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
+            self.close()
             event.accept()
         else:
             event.ignore()
@@ -219,6 +256,7 @@ class ReceiveMessageThread(QThread):
 
     def run(self):
         while self.ready:
+
             data = self.client.receive_message()
             if len(data) == 1:
                 try:
