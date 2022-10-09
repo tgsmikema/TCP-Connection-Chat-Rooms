@@ -36,7 +36,7 @@ class ChatServer(object):
         self.server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.server.bind((SERVER_HOST, port))
         self.server.listen(backlog)
-        self.server = self.context.wrap_socket(self.server, server_side=True)
+        self.server = self.context.wrap_socket(self.server, server_side=True, suppress_ragged_eofs=True)
         # Catch keyboard interrupts
         signal.signal(signal.SIGINT, self.sighandler)
 
@@ -145,7 +145,7 @@ class ChatServer(object):
                                 self.groups_list.append(group_room)
 
                             elif data == "special-command-get-group-list":
-                                pass
+                                send(sock, self.groups_list)
 
                             elif type(data) == list:
                                 # print(f"----{data}--------")

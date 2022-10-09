@@ -60,6 +60,7 @@ class Connected(QWidget):
         room_create_btn = QPushButton("Create")
         room_create_btn.clicked.connect(self.create_room)
         room_join_btn = QPushButton("Join")
+        room_join_btn.clicked.connect(self.group_chat)
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.close)
         vbox_room_buttons.addStretch(1)
@@ -192,13 +193,13 @@ class Connected(QWidget):
     # Transition to Group Chat Rooms
     def group_chat(self, client):
 
-        if self.selected_client_name == "":
+        if self.selected_chat_room_name == "":
             # print("you have to select at least one")
-            QMessageBox.warning(self, 'Error!', 'you have to select at least one user')
+            QMessageBox.warning(self, 'Error!', 'you have to select at least one group')
         else:
             self.clientThread.stop()
             time.sleep(0.3)
-            self.group_chat_room = GroupChat(self.client, self.client_name, self.selected_chat_room_name, self, self.clientThread)
+            self.group_chat_room = GroupChat(self.client, self.client_name, self.selected_chat_room_name.split(" ")[0], self, self.clientThread)
             self.hide()
             self.group_chat_room.show()
 

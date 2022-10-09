@@ -42,7 +42,7 @@ class ChatClient():
         # Connect to server at port
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock = self.context.wrap_socket(self.sock, server_hostname=host)
+            self.sock = self.context.wrap_socket(self.sock, server_hostname=host, suppress_ragged_eofs=True)
 
             self.sock.connect((host, self.port))
             print(f'Now connected to chat server@ port {self.port}')
@@ -125,10 +125,20 @@ class ChatClient():
     def leave_room(self, message):
         send(self.sock, message)
 
+    def receive_group_list_only(self):
+        send(self.sock, "special-command-get-group-list")
+        # data = receive(self.sock)
+        # print(data)
+        # return data
+
     def send_message(self, message):
         send(self.sock, message)
 
     def receive_message(self):
+        data = receive(self.sock)
+        return data
+
+    def receive_message_group(self):
         data = receive(self.sock)
         return data
 

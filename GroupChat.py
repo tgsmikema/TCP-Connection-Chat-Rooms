@@ -29,6 +29,8 @@ class GroupChat(QWidget):
 
     def initUI(self):
 
+        self.register_in_room()
+
         vbox_entire_screen = QVBoxLayout()
 
         self.dlg = QFileDialog()
@@ -48,14 +50,16 @@ class GroupChat(QWidget):
         vbox_entire_screen.addWidget(self.message_browser)
 
         self.message_browser.selectionModel().selectionChanged.connect(self.on_row_changed)
-
         self.message_browser.setIconSize(QtCore.QSize(200, 200))
 
+        time.sleep(0.3)
+        self.room_message_thread = RoomMessageThread(self.client)
+        self.room_message_thread.member_messages.connect(self.update_room_members)
+        self.room_message_thread.messages.connect(self.update_chat_message_record)
+        self.room_message_thread.start()
 
-        self.receive_msg_thread = ReceiveMessageThread(self.client)
-        self.receive_msg_thread.messages.connect(self.update_chat_message_record)
-
-        self.receive_msg_thread.start()
+        self.parse_member_thread = ParseMemberThread(self.client)
+        self.parse_member_thread.start()
 
         # Picture Buttons
         view_pic_btn = QPushButton("View Selected Picture")
@@ -145,6 +149,7 @@ class GroupChat(QWidget):
         data.append(self.group_name)
         data.append(self.client_name)
 
+        # print(data)
         self.client.join_new_room(data)
 
     def deregister_from_room(self):
@@ -155,6 +160,15 @@ class GroupChat(QWidget):
         data.append(self.client_name)
 
         self.client.leave_room(data)
+
+    def update_room_members(self, member_messages):
+
+
+        if "127.0.0.1" in str(member_messages):
+            print("WRONG!")
+        else:
+            print(member_messages)
+
 
     def update_chat_message_record(self, messages):
 
@@ -269,10 +283,15 @@ class GroupChat(QWidget):
 
 
     def close(self):
-        self.receive_msg_thread.stop()
+        time.sleep(0.2)
+        self.room_message_thread.stop()
+        time.sleep(0.2)
+        self.parse_member_thread.stop()
+        time.sleep(0.2)
 
         self.hide()
         self.prev_gui.show()
+        time.sleep(0.2)
         self.client_thread.restart()
         self.client_thread.start()
 
@@ -292,10 +311,7 @@ class GroupChat(QWidget):
 #     ex = GroupChat("s","dd","rrrr","ddd","rrrr")
 #     sys.exit(app.exec_())
 
-
-class ReceiveMessageThread(QThread):
-    messages = pyqtSignal(list)
-
+class ParseMemberThread(QThread):
     def __init__(self, client):
         super().__init__()
         self.ready = True
@@ -303,18 +319,8 @@ class ReceiveMessageThread(QThread):
 
     def run(self):
         while self.ready:
-
-            data = self.client.receive_message()
-            if len(data) == 1:
-                try:
-                    self.messages.emit(data)
-                except TypeError as e:
-                    pass
-            else:
-                try:
-                    self.messages.emit(data)
-                except TypeError as e:
-                    pass
+            time.sleep(0.2)
+            self.client.receive_group_list_only()
 
     def stop(self):
         self.ready = False
@@ -323,23 +329,27 @@ class ReceiveMessageThread(QThread):
         self.ready = True
 
 
-class RoomMembersThread(QThread):
+class RoomMessageThread(QThread):
+
     messages = pyqtSignal(list)
+    member_messages = pyqtSignal(list)
 
     def __init__(self, client):
         super().__init__()
         self.ready = True
         self.client = client
+        self.message_switch = False
 
     def run(self):
         while self.ready:
-
-            data = self.client.receive_message()
-            if len(data) == 1:
-                try:
+            try:
+                data = self.client.receive_message()
+                if type(data[0]) == str:
                     self.messages.emit(data)
-                except TypeError as e:
-                    pass
+                else:
+                    self.member_messages.emit(data)
+            except TypeError as e:
+                pass
 
     def stop(self):
         self.ready = False
