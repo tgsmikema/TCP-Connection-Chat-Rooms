@@ -62,6 +62,7 @@ class OneToOneChat(QWidget):
         view_pic_btn = QPushButton("View Selected Picture")
         view_pic_btn.clicked.connect(self.view_image)
         download_pic_button = QPushButton("Download Selected Picture")
+        download_pic_button.clicked.connect(self.save_files)
         hbox_pic = QHBoxLayout()
 
         hbox_pic.addWidget(view_pic_btn)
@@ -155,6 +156,25 @@ class OneToOneChat(QWidget):
                 self.message_browser.addItem(messages[1])
                 self.message_browser.addItem(img)
 
+
+    def save_files(self):
+
+        if self.selected_file_name != "":
+
+            name = QFileDialog.getSaveFileName(self, 'Save File')
+
+            extension = self.selected_file_name.split(".")
+            extension_name = "." + extension[len(extension) - 1]
+
+            file_to_save = open(name[0] + extension_name, 'wb')
+
+            file_open = open(f"{self.selected_file_name}", 'rb')
+            with file_open:
+                img_data = file_open.read()
+            file_open.close()
+
+            file_to_save.write(img_data)
+            file_to_save.close()
 
 
     def get_files(self):
