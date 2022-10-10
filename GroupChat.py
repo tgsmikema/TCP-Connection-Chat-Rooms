@@ -13,6 +13,7 @@ from PyQt5 import QtWidgets, QtCore
 from PyQt5 import QtGui
 
 from Client import ChatClient
+from GroupChatInvite import GroupChatInvite
 from PictureViewer import PictureViewer
 
 
@@ -109,6 +110,7 @@ class GroupChat(QWidget):
 
         invite_btn = QPushButton("Invite")
         invite_btn.setFont(QFont('Times', 14))
+        invite_btn.clicked.connect(self.invite_window)
 
         vbox_right_screen.addWidget(members_label)
         vbox_right_screen.addWidget(self.members_list)
@@ -131,6 +133,25 @@ class GroupChat(QWidget):
         if self.selected_file_name != "":
             self.dialog = PictureViewer(self.selected_file_name)
             self.dialog.show()
+
+    def invite_window(self):
+        self.room_message_thread.stop()
+        time.sleep(0.3)
+        self.parse_member_thread.stop()
+        time.sleep(0.3)
+
+        self.dialog = GroupChatInvite(self.client, self.group_name, self.room_message_thread, self.parse_member_thread)
+        self.dialog.show()
+
+        time.sleep(0.3)
+        self.room_message_thread.restart()
+        self.room_message_thread.start()
+        time.sleep(0.3)
+        self.parse_member_thread.restart()
+        self.parse_member_thread.start()
+
+
+
     def on_row_changed(self, current, previous):
 
         current_text = self.message_browser.currentItem().text()
@@ -140,7 +161,7 @@ class GroupChat(QWidget):
         else:
             self.selected_file_name = ""
 
-        print(self.selected_file_name)
+        # print(self.selected_file_name)
 
     def register_in_room(self):
 
@@ -326,17 +347,15 @@ class GroupChat(QWidget):
             for data_element in img_data_list:
 
                 data = []
-                data.append("chat-img")
+                data.append("group-chat-img")
                 filename = str(uuid.uuid4())
                 data.append(filename + extension_name)
                 data.append(self.client_name)
-                data.append(self.other_client_name)
+                data.append(self.group_name)
                 data.append(data_element)
                 data.append(sent_file_size)
                 # print(data)
                 self.client.send_message(data)
-
-
 
     def send_message(self):
         msg = self.chat_message_box.text()
@@ -352,14 +371,12 @@ class GroupChat(QWidget):
             self.chat_message_box.clear()
 
 
-
-
     def close(self):
-        time.sleep(0.2)
+        time.sleep(0.3)
         self.room_message_thread.stop()
-        time.sleep(0.2)
+        time.sleep(0.3)
         self.parse_member_thread.stop()
-        time.sleep(0.2)
+        time.sleep(0.3)
         self.deregister_from_room()
 
         self.hide()
@@ -417,6 +434,7 @@ class RoomMessageThread(QThread):
         while self.ready:
             try:
                 data = self.client.receive_message()
+                # print(data)
                 if type(data[0]) != list:
                     self.messages.emit(data)
                 else:

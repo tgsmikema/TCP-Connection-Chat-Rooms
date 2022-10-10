@@ -247,6 +247,83 @@ class ChatServer(object):
                                         # print([message])
                                         send(output_sock, [message])
 
+                                elif data[0] == "group-chat-img":
+                                    origin_client_name = data[2]
+                                    group_name = data[3]
+
+                                    chat_room = []
+                                    for room in self.groups_list:
+                                        if room[0][0] == group_name:
+                                            chat_room = room
+                                            break
+                                    clients_to_send_to = chat_room[1]
+
+                                    send_socks = []
+
+                                    for client in self.clientmap:
+                                        if self.clientmap[client][1] in clients_to_send_to:
+                                            send_socks.append(client)
+
+                                    img_data = data[4]
+
+                                    # print(send_socks)
+                                    for output_sock in send_socks:
+                                        # if it's the sender
+                                        message = ""
+                                        if self.clientmap[output_sock][1] == origin_client_name:
+                                            message = f"Me ({current_time}):  Sent Image"
+                                        else:
+                                            message = f"{origin_client_name} ({current_time}):  Sent Image"
+                                        # print([message])
+                                        reply_data = []
+                                        reply_data.append(img_data)
+                                        reply_data.append(message)
+                                        reply_data.append(data[1])
+                                        reply_data.append(data[5])
+                                        # print(reply_data)
+                                        send(output_sock, reply_data)
+
+                                elif data[0] == "get-available-members":
+                                    group_name = data[1]
+
+                                    all_client_name_list = []
+                                    for client in self.clients_list:
+                                        all_client_name_list.append(client[0])
+
+                                    chat_room = []
+                                    for room in self.groups_list:
+                                        if room[0][0] == group_name:
+                                            chat_room = room
+                                            break
+
+                                    online_client_name_list = chat_room[1]
+
+                                    final_client_name_list = []
+
+                                    for each_client in all_client_name_list:
+                                        if each_client not in online_client_name_list:
+                                            final_client_name_list.append(each_client)
+
+                                    # print(final_client_name_list)
+
+                                    final_data = ["invite-data", [final_client_name_list]]
+
+                                    send(sock, final_client_name_list)
+
+                                elif data[0] == "invite-other":
+                                    other_name = data[1]
+                                    room_name = data[2]
+
+                                    target_client = []
+
+                                    for client in self.clientmap:
+                                        if self.clientmap[client][1] == other_name:
+                                            target_client.append(client)
+
+                                    # print(self.clientmap[client][1])
+
+                                    send(target_client[0], ["invite-message-special", room_name, "filler", "filler2"])
+
 
                             else:
                                 # Send as new client's message...
@@ -274,10 +351,10 @@ class ChatServer(object):
                                     self.clients_list.remove(client_record)
 
                             # remove offline clients from groups
-                            for i in range(len(self.groups_list)):
-                                client_name = self.get_client_name(sock).split('@')[0]
-                                if client_name in self.groups_list[1]:
-                                    self.groups_list[1].remove(client_name)
+                            # for i in range(len(self.groups_list)):
+                            #     client_name = self.get_client_name(sock).split('@')[0]
+                            #     if client_name in self.groups_list[1]:
+                            #         self.groups_list[1].remove(client_name)
 
 
                             # Sending client leaving information to others

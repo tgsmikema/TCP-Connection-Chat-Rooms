@@ -142,6 +142,32 @@ class ChatClient():
         data = receive(self.sock)
         return data
 
+    def invite_other_member(self, other_name, room_name):
+        data = []
+        data.append("invite-other")
+        data.append(other_name)
+        data.append(room_name)
+        send(self.sock, data)
+
+    def get_list_of_client_not_in_room(self, group_name):
+        send_list = []
+        send_list.append("get-available-members")
+        send_list.append(group_name)
+        send(self.sock, send_list)
+        data = receive(self.sock)
+        while True:
+            try:
+                if len(data) == 0:
+                    break
+                if type(data[0]) != str:
+                    data = receive(self.sock)
+                else:
+                    break
+            except IndexError as e:
+                pass
+
+        return data
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', action="store", dest="name", required=True)
