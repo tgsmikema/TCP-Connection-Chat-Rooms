@@ -282,7 +282,10 @@ class GroupChat(QWidget):
                 self.original_file_b_data += messages[0]
             else:
                 # message[2] file_name
-                image_file = open(f"{messages[2]}", "wb")
+                current_dir = os.getcwd()
+                image_dir = os.path.join(current_dir, "cache")
+                file_name = os.path.join(image_dir, messages[2])
+                image_file = open(file_name, "wb")
                 image_file.write(self.original_file_b_data)
                 time.sleep(0.2)
                 image_file.close()
@@ -292,7 +295,7 @@ class GroupChat(QWidget):
                 img = QListWidgetItem()
                 # apply transparent color to texts
                 img.setForeground(QColor(255, 255, 255, 0))
-                img.setIcon(QIcon(f"{messages[2]}"))
+                img.setIcon(QIcon(file_name))
                 img.setText(f"{messages[2]}")
                 img.setSizeHint(QSize(200, 200))
 
@@ -311,7 +314,12 @@ class GroupChat(QWidget):
 
             file_to_save = open(name[0] + extension_name, 'wb')
 
-            file_open = open(f"{self.selected_file_name}", 'rb')
+            current_dir = os.getcwd()
+            image_dir = os.path.join(current_dir, "cache")
+            selected_file_name = os.path.join(image_dir, self.selected_file_name)
+
+            file_open = open(selected_file_name, 'rb')
+
             with file_open:
                 img_data = file_open.read()
             file_open.close()

@@ -16,7 +16,9 @@ class PictureViewer(QWidget):
         self.image_label = QLabel()
         self.image_label.setMinimumSize(1500, 1000)
         self.pic_size = self.image_label.size()
-        self.image_label.setPixmap(QPixmap(f'{self.image_name}').scaled(self.pic_size, Qt.KeepAspectRatio))
+        current_dir = os.getcwd()
+        image_dir = os.path.join(current_dir, "cache")
+        self.image_label.setPixmap(QPixmap(os.path.join(image_dir, self.image_name)).scaled(self.pic_size, Qt.KeepAspectRatio))
 
         self.main_layout = QVBoxLayout()  # adding widgets to layot
         self.main_layout.addWidget(self.image_label)
