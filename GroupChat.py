@@ -360,6 +360,7 @@ class GroupChat(QWidget):
         time.sleep(0.2)
         self.parse_member_thread.stop()
         time.sleep(0.2)
+        self.deregister_from_room()
 
         self.hide()
         self.prev_gui.show()
