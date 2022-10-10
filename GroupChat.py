@@ -344,9 +344,9 @@ class GroupChat(QWidget):
             QMessageBox.warning(self, 'Error!', 'You Cannot Send An Empty Message!')
         else:
             data = []
-            data.append("chat")
+            data.append("group-chat")
             data.append(self.client_name)
-            data.append(self.other_client_name)
+            data.append(self.group_name)
             data.append(msg)
             self.client.send_message(data)
             self.chat_message_box.clear()

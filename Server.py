@@ -217,6 +217,35 @@ class ChatServer(object):
                                             if client_name in group_room[1]:
                                                 group_room[1].remove(client_name)
 
+                                elif data[0] == "group-chat":
+                                    origin_client_name = data[1]
+                                    group_name = data[2]
+                                    msg = data[3]
+
+                                    chat_room = []
+                                    for room in self.groups_list:
+                                        if room[0][0] == group_name:
+                                            chat_room = room
+                                            break
+                                    clients_to_send_to = chat_room[1]
+
+                                    send_socks = []
+
+                                    for client in self.clientmap:
+                                        if self.clientmap[client][1] in clients_to_send_to:
+                                            send_socks.append(client)
+
+                                    current_time = datetime.now().strftime("%H:%M")
+
+                                    for output_sock in send_socks:
+                                        # if it's the sender
+                                        message = ""
+                                        if self.clientmap[output_sock][1] == origin_client_name:
+                                            message = f"Me ({current_time}):  {msg}"
+                                        else:
+                                            message = f"{origin_client_name} ({current_time}):  {msg}"
+                                        # print([message])
+                                        send(output_sock, [message])
 
 
                             else:
