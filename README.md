@@ -23,7 +23,7 @@ UPI: sma148
 
   2) Type In following command to start the server:
   
-          `python Server.py --name=server --port=9900`
+          python Server.py --name=server --port=9900
 
         where you can replace the `9900` port number to other port numbers if you prefer. 
 
@@ -33,7 +33,7 @@ UPI: sma148
 
   2) Type in each Command Prompt to start each Client GUI:
   
-          `python Connection.py`
+          python Connection.py
   3) Fill in the same Port number as specified in the Server above, i.e. `9900`
   4) Choose a nickname for each client, **MAKE SURE NO TWO CLIENTS HAVE THE SAME NAME !**
   5) Click the button - `connect`
