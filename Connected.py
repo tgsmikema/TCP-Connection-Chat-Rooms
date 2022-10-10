@@ -107,74 +107,77 @@ class Connected(QWidget):
                 self.group_chat(self.client)
 
         else:
+            try:
 
-            all_client = all_clients_and_groups[0]
-            all_group = all_clients_and_groups[1]
+                all_client = all_clients_and_groups[0]
+                all_group = all_clients_and_groups[1]
 
-            if self.qlist_connected_clients.currentRow() != -1:
-                self.selected_client_name = self.qlist_connected_clients.currentItem().text().split(" - ")[0]
-            else:
-                self.selected_client_name = ""
-
-            if self.qlist_chat_rooms.currentRow() != -1:
-                self.selected_chat_room_name = self.qlist_chat_rooms.currentItem().text().split(" - ")[0]
-            else:
-                self.selected_chat_room_name = ""
-
-            if self.qlist_connected_clients.count() > len(all_client):
-                self.qlist_connected_clients.reset()
-                self.qlist_connected_clients.clear()
-
-            if self.qlist_chat_rooms.count() > len(all_group):
-                self.qlist_chat_rooms.reset()
-                self.qlist_chat_rooms.clear()
-
-            for client in all_client:
-                is_found = False
-                if client[0] == self.client_name:
-                    for i in range(self.qlist_connected_clients.count()):
-                        try:
-
-                            disp_cname = self.qlist_connected_clients.item(i).text().split(" - (me) ")[0]
-                            disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" - (me) ")[1]
-
-                            if disp_cname == client[0]:
-                                is_found = True
-                                if disp_lapse_time != client[4]:
-                                    self.qlist_connected_clients.item(i).setText(client[0] + " - (me) " + client[4])
-                        except IndexError:
-                            pass
-                    if not is_found:
-                        self.qlist_connected_clients.addItem(client[0] + " - (me) " + client[4])
+                if self.qlist_connected_clients.currentRow() != -1:
+                    self.selected_client_name = self.qlist_connected_clients.currentItem().text().split(" - ")[0]
                 else:
-                    for i in range(self.qlist_connected_clients.count()):
+                    self.selected_client_name = ""
+
+                if self.qlist_chat_rooms.currentRow() != -1:
+                    self.selected_chat_room_name = self.qlist_chat_rooms.currentItem().text().split(" - ")[0]
+                else:
+                    self.selected_chat_room_name = ""
+
+                if self.qlist_connected_clients.count() > len(all_client):
+                    self.qlist_connected_clients.reset()
+                    self.qlist_connected_clients.clear()
+
+                if self.qlist_chat_rooms.count() > len(all_group):
+                    self.qlist_chat_rooms.reset()
+                    self.qlist_chat_rooms.clear()
+
+                for client in all_client:
+                    is_found = False
+                    if client[0] == self.client_name:
+                        for i in range(self.qlist_connected_clients.count()):
+                            try:
+
+                                disp_cname = self.qlist_connected_clients.item(i).text().split(" - (me) ")[0]
+                                disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" - (me) ")[1]
+
+                                if disp_cname == client[0]:
+                                    is_found = True
+                                    if disp_lapse_time != client[4]:
+                                        self.qlist_connected_clients.item(i).setText(client[0] + " - (me) " + client[4])
+                            except IndexError:
+                                pass
+                        if not is_found:
+                            self.qlist_connected_clients.addItem(client[0] + " - (me) " + client[4])
+                    else:
+                        for i in range(self.qlist_connected_clients.count()):
+                            try:
+
+                                disp_cname = self.qlist_connected_clients.item(i).text().split(" - ")[0]
+
+                                disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" - ")[1]
+
+                                if disp_cname == client[0]:
+                                    is_found = True
+                                    if disp_lapse_time != client[4]:
+                                        self.qlist_connected_clients.item(i).setText(client[0] + " - " + client[4])
+                            except IndexError:
+                                pass
+                        if not is_found:
+                            self.qlist_connected_clients.addItem(client[0] + " - " + client[4])
+
+                for room in all_group:
+                    is_found_room = False
+                    for i in range(self.qlist_chat_rooms.count()):
                         try:
-
-                            disp_cname = self.qlist_connected_clients.item(i).text().split(" - ")[0]
-
-                            disp_lapse_time = self.qlist_connected_clients.item(i).text().split(" - ")[1]
-
-                            if disp_cname == client[0]:
-                                is_found = True
-                                if disp_lapse_time != client[4]:
-                                    self.qlist_connected_clients.item(i).setText(client[0] + " - " + client[4])
+                            disp_rname = self.qlist_chat_rooms.item(i).text().split(" by ")[0]
+                            disp_owner_name = self.qlist_chat_rooms.item(i).text().split(" by ")[1]
+                            if disp_rname == room[0][0]:
+                                is_found_room = True
                         except IndexError:
                             pass
-                    if not is_found:
-                        self.qlist_connected_clients.addItem(client[0] + " - " + client[4])
-
-            for room in all_group:
-                is_found_room = False
-                for i in range(self.qlist_chat_rooms.count()):
-                    try:
-                        disp_rname = self.qlist_chat_rooms.item(i).text().split(" by ")[0]
-                        disp_owner_name = self.qlist_chat_rooms.item(i).text().split(" by ")[1]
-                        if disp_rname == room[0][0]:
-                            is_found_room = True
-                    except IndexError:
-                        pass
-                if not is_found_room:
-                    self.qlist_chat_rooms.addItem(room[0][0] + " by " + room[0][1])
+                    if not is_found_room:
+                        self.qlist_chat_rooms.addItem(room[0][0] + " by " + room[0][1])
+            except IndexError as e:
+                pass
 
     def closeEvent(self, event):
         reply = QMessageBox.question(self, 'Message', 'Are you sure to quit?',
